@@ -23,6 +23,5 @@ public class CalendarTest extends TestBase {
         logger.info(calendarScreen.getYear(dateToSelect)+ " Year displayed on the Date Picker Header");
         Assert.assertTrue(calendarScreen.getDatePickerDate().getText().contains(calendarScreen.expectedDate(dateToSelect)));
         logger.info(calendarScreen.expectedDate(dateToSelect) + " Date displayed on the Date Picker Header");
-        logger.info("----------------------------------End Test-------------------------------------------------");
     }
 }

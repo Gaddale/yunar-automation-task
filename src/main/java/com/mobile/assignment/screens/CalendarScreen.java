@@ -4,6 +4,7 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidElement;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
+import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
@@ -13,7 +14,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import static org.apache.log4j.Logger.getLogger;
+
 public class CalendarScreen extends Screen{
+
+    private static Logger logger = getLogger(CalendarScreen.class.getName());
 
     @AndroidFindBy(xpath = "//android.view.View[@text='15']")
     public WebElement currentYearMonth;
@@ -58,10 +63,10 @@ public class CalendarScreen extends Screen{
     }
 
     public int getMonthNumber(String monthName) throws ParseException {
+        logger.info("Get Month Number");
         Date date = new SimpleDateFormat("MMMM").parse(monthName);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        System.out.println(calendar.get(Calendar.MONTH) + 1);
         return calendar.get(Calendar.MONTH) + 1;
     }
 
@@ -75,22 +80,14 @@ public class CalendarScreen extends Screen{
         return upToNCharacters+" "+dateToSelect.split(" ")[0];
     }
 
-    public void selectDate(String dateToSelect) throws ParseException {
-        int givenYear = Integer.parseInt(dateToSelect.split(" ")[2]);
-        int givenMonth = getMonthNumber(dateToSelect.split(" ")[1]);
-        int givenDate = Integer.parseInt(dateToSelect.split(" ")[0]);
-        int displayedYear = Integer.parseInt(getCurrentYearMonth().getAttribute("content-desc").split(" ")[2]);
-        int displayedMonth = getMonthNumber(getCurrentYearMonth().getAttribute("content-desc").split(" ")[1]);
-        int frontTaps = 0;
-        int backTaps = 0;
-        int yearCal = 0;
-
+    public int[] getTaps(int givenYear, int displayedYear, int givenMonth, int displayedMonth){
+        logger.info("Get TapNext and TapPrev Count");
+        int frontTaps=0, backTaps=0, yearCal = 0;
         if (givenYear == displayedYear) {
             if (givenMonth >= displayedMonth) {
                 frontTaps = givenMonth - displayedMonth;
             } else backTaps = displayedMonth - givenMonth;
         } else if (givenYear > displayedYear) {
-
             yearCal = (givenYear - displayedYear) * 12;
             if (givenMonth >= displayedMonth) {
                 frontTaps = yearCal + (givenMonth - displayedMonth);
@@ -105,15 +102,28 @@ public class CalendarScreen extends Screen{
                 backTaps = yearCal + (displayedMonth - givenMonth);
             }
         }
+        return new int[]{frontTaps, backTaps};
+    }
 
-        for (int i = 1; i <= frontTaps; i++) {
-            getTapNext().click();
-        }
 
-        for (int i = 1; i <= backTaps; i++) {
-            getTapPrevious().click();
-        }
-
+    public void selectDate(String dateToSelect) throws ParseException {
+        logger.info("Start Select Date Logic");
+        int givenYear = Integer.parseInt(dateToSelect.split(" ")[2]);
+        int givenMonth = getMonthNumber(dateToSelect.split(" ")[1]);
+        int givenDate = Integer.parseInt(dateToSelect.split(" ")[0]);
+        int displayedYear = Integer.parseInt(getCurrentYearMonth().getAttribute("content-desc").split(" ")[2]);
+        int displayedMonth = getMonthNumber(getCurrentYearMonth().getAttribute("content-desc").split(" ")[1]);
+        int[] taps = getTaps(givenYear,displayedYear, givenMonth, displayedMonth);
+        carryTaps("tapNext", taps[0]);
+        carryTaps("tapPrev", taps[1]);
         appiumDriver.findElement(By.xpath(tapDate.replace("day", String.valueOf(givenDate)))).click();
+    }
+
+    public void carryTaps(String action, int tapCount){
+        logger.info("Carry Taps for "+action);
+        for (int i = 1; i <= tapCount; i++) {
+            if (action.equals("tapNext")) { getTapNext().click(); }
+            else if (action.equals("tapPrev")) { getTapPrevious().click(); }
+        }
     }
 }

@@ -49,6 +49,7 @@ public class TestBase {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        logger.info("----------------------------------Start Test-------------------------------------------------");
         startServer();
         launchEmulator(Configuration.EMULATOR_NAME.getValue());
         appiumDriver = AppiumDriverFactory.getAppiumDriver();
@@ -63,6 +64,7 @@ public class TestBase {
         closeEmulator();
         service.stop();
         logger.info("Stopping Appium Server....");
+        logger.info("----------------------------------End Test-------------------------------------------------");
     }
 
     public void startServer() throws InterruptedException {
