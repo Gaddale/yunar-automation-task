@@ -88,7 +88,7 @@ public class CalendarScreen extends Screen{
         if (givenYear == displayedYear) {
             if (givenMonth >= displayedMonth) {
                 frontTaps = givenMonth - displayedMonth;
-            } else backTaps = displayedMonth - givenDate;
+            } else backTaps = displayedMonth - givenMonth;
         } else if (givenYear > displayedYear) {
 
             yearCal = (givenYear - displayedYear) * 12;
